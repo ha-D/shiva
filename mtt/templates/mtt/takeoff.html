@@ -1,0 +1,97 @@
+{% load staticfiles %}<!doctype html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Minutes to Takeoff</title>
+	<link href='http://fonts.googleapis.com/css?family=Roboto:900' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:700&text=0123456789' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" href="{% static 'mtt/style/main.css' %}"></link>
+	<script language="Javascript" type="text/javascript" src="{% static 'js/jquery-1.4.1.js' %}"></script>
+	<script language="Javascript" type="text/javascript" src="{% static 'js/jquery.lwtCountdown-1.0.js' %}"></script>
+	<script language="javascript" type="text/javascript">
+	var times = [
+		{% for friend in friends %}
+			{id:'#cnt{{ forloop.counter }}',hasvisa:{% if friend.6 == "No" %}false{% else %}true{% endif %},dest:'{{ friend.8 }}',date:{'day':{{ friend.3 }}, 'month':{{ friend.4 }}, 'year': {{ friend.5 }},'hour':{{ friend.1 }}, 'min':{{ friend.2 }}, 'sec': 0 }},
+		{% endfor %}
+	];
+	var monthNames = [ "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December" ];
+
+	jQuery(document).ready(function() {
+		times.forEach(function(t){
+			$(t.id).countDown({
+				targetDate: t.date,
+				onComplete: function() { takeoff(t); }
+			});
+		});
+	});
+
+	function takeoff(t) {
+		if(t.hasvisa) {
+			$(t.id).parent().addClass('flown');
+			$(t.id).html("Left for "+t.dest+"<br/>on "+monthNames[t.date.month-1]+" "+t.date.day+", "+t.date.year).addClass("gone");
+		}
+		else {
+			$(t.id).parent().addClass('notgone');
+                        $(t.id).html("Hasn't left for "+t.dest+"<br/>on "+monthNames[t.date.month-1]+" "+t.date.day+", "+t.date.year).addClass("gone");
+		}
+	}
+	</script>
+</head>
+
+<body>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-35315850-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+	<div id="container">
+	<header>Minutes to Takeoff</header>
+	<div class="maps"><a href="{% url 'maps' %}">Maps View</a></div>
+	{% for friend in friends %}
+	<div class="friend{% if friend.6 == "No" %} novisa {% endif %}">
+		<div class="name">{{ friend.0 }}</div>
+		<div class="board"  id="cnt{{ forloop.counter }}">
+			<div class="dash days_dash">
+				<span class="dash_title">days</span>
+				<div class="digit">0</div>
+				<div class="digit">0</div>
+			</div>
+
+			<div class="dash hours_dash">
+				<span class="dash_title">hours</span>
+				<div class="digit">0</div>
+				<div class="digit">0</div>
+			</div>
+
+			<div class="dash minutes_dash">
+				<span class="dash_title">minutes</span>
+				<div class="digit">0</div>
+				<div class="digit">0</div>
+			</div>
+
+			<div class="dash seconds_dash">
+				<span class="dash_title">seconds</span>
+				<div class="digit">0</div>
+				<div class="digit">0</div>
+			</div>
+
+		</div>
+	</div>
+	{% endfor %}
+	</div>
+	<div class="legend">
+	Black: Got Visa, Orange: Not Yet, Blue: Has Flown
+	</div>
+	<div class="twitter">
+		<a class="twitter-timeline" href="https://twitter.com/wholeaveswhen" data-widget-id="489872104481771520">Follow @wholeaveswhen to get departure reminders</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	</div>
+</body>
+
+</html>

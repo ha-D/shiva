@@ -1,0 +1,185 @@
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: 'Roboto', sans-serif;
+	text-align: center;
+	z-index: 1;
+	background: url('../images/bg.jpg') no-repeat 50% 50% fixed;
+	background-size: cover;
+}
+
+#container {
+	margin: 0 auto;
+	width: 800px;
+	padding-top: 30px;
+	color: #fff;
+}
+
+#bg {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  max-width: 100%;
+  /* min-height: 800px; */
+  z-index: -1;
+}
+
+.board {
+	width: 456px;
+	height: 110px;
+	margin: 0 auto;
+}
+
+.dash {
+	width: 93px;
+	height: 75px;
+	float: left;
+	margin-left: 20px;
+	position: relative;
+	font-weight: bold;
+}
+
+.dash .digit {
+	font-family: 'Source Code Pro', Times, serif;
+	font-size: 35pt;
+	font-weight: bold;
+	float: left;
+	width: 35px;
+	text-align: center;
+	color: #eee;
+	position: relative;
+}
+
+.dash_title {
+	position: absolute;
+	display: block;
+	bottom: 0px;
+	right: 26px;
+	font-size: 10pt;
+	color: #eee;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+}
+
+.name {
+	margin: 28px;
+	font-size: 30px;
+}
+
+.friend {
+	background-color: black; 
+	background-color: rgba(10,10,10,0.8);
+	padding: 4px;
+	box-sizing: border-box;
+}
+
+.novisa {
+	background-color: orange;
+	background-color: rgba(55,30,0,0.9);
+}
+
+.notgone {
+	background-color: darkred;
+	background-color: rgba(80,20,0,0.9);
+}
+
+header {
+	font-size: 50px;
+	margin: 40px;
+	text-shadow: 0 0 4px black,0 0 8px black;
+}
+
+.gone {
+	font-size: 25px;
+}
+
+
+.flown {
+	background-color: #72a0ff;
+	background-color: rgba(0,40,40,0.9);
+}
+
+.legend {
+	margin-top: 40px;
+	margin-bottom: 100px;
+	color: white;
+	background-color: rgba(0,0,0,0.8);
+	padding: 10px;
+}
+
+body[data-twttr-rendered] .twitter {
+	opacity: 0.9;
+}
+
+body[data-twttr-rendered] .twitter:before {
+	content: "Departure News and Reminders";
+	display: block;
+	color: white;
+	font-size: 21px;
+	margin-bottom: 20px;
+	padding: 10px;
+	background-color: black;
+	background-color: rgba(0,0,0,0.9);	
+}
+
+a.twitter-timeline {
+	display: block;
+	color: orange;
+	text-decoration: none;
+	padding: 10px;
+	margin: 25px;
+	background-color: rgba(0,0,0,0.8);
+}
+
+.maps {
+	background-color:rgba(10,10,10,0.8);
+	color: #ff6333;
+	text-decoration: underline;
+	padding: 15px;
+	cursor: pointer;
+	font-size: 21px;
+	margin: 0 auto;
+}
+.maps a:visited,.maps a:hover,.maps a:focus {
+	color: #ff6333;
+}
+
+@media screen and (max-width: 800px) {
+	body {
+		background-position: 35% 70%;
+		background-size: cover;
+	}
+	#container {
+		width: 100%;
+	}
+	header {
+		text-shadow: 0 0 2px black,0 0 4px black,0 0 6px black,0 0 12px black;
+	}
+	.friend {
+		width: 100%;
+	}
+	.board {
+		width: 315px;
+		margin: 0 auto;
+	}
+	.dash {
+		width: 58px;
+		height: 62px;
+	}
+	.dash .digit {
+		font-size: 20pt;
+		width: 20px;
+	}
+	.name {
+		font-size: 24px;
+	}
+	.gone {
+		font-size: 20px;
+	}
+	.dash_title {
+		right: 19px;
+		font-size: 9pt;
+	}
+}
+

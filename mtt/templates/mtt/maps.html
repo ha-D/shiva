@@ -1,0 +1,214 @@
+{% load staticfiles %}<!doctype html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Minutes to Takeoff: Maps</title>
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+      #go-back {
+        display: block;
+        text-decoration: none;
+        position: absolute;
+        z-index: 100;
+        right: 20px;
+        bottom: 30px;
+        padding: 10px;
+        text-align: center;
+        font-size: 12px;
+        line-height: 18px;
+        background-color: rgba(0,0,0,0.8);
+        border-radius: 4px;
+        color: white;
+        opacity: 0.3;
+        font-family: HelveticaNeue, Helvetica, sans-serif;
+      }
+      #go-back:hover {
+        opacity: 1;
+      }
+    </style>
+
+	<script language="javascript" type="text/javascript">
+
+	var friends = [
+		{% for friend in friends %}
+			{id:'#cnt{{ forloop.counter }}',hasvisa:{% if friend.6 == "No" %}false{% else %}true{% endif %},address:"{{ friend.9 }}",name:"{{ friend.0 }}",dest:'{{ friend.8 }}',date:{'day':{{ friend.3 }}, 'month':{{ friend.4 }}, 'year': {{ friend.5 }},'hour':{{ friend.1 }}, 'min':{{ friend.2 }}, 'sec': 0 }},
+		{% endfor %}
+	];
+  var grouped_friends = group_friends();
+	var monthNames = [ "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December" ];
+  function group_friends() {
+    var group = {};
+    friends.forEach(function(f){
+      if(group[f.dest]!==undefined)
+        group[f.dest].push(f);
+      else
+        group[f.dest]=[f];
+    });
+    var list = [];
+    for(var g in group) {
+      list.push({'dest':g,'address':group[g][0].address,'list':group[g]});
+    }
+    return list;
+  }
+
+	</script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script>
+var geocoder;
+var landed_icon = "{% static 'mtt/images/landed.png' %}";
+var visa_icon = "{% static 'mtt/images/visa.png' %}";
+var airport_icon = "{% static 'mtt/images/airport.png' %}";
+var bounds = new google.maps.LatLngBounds();
+var markersArray=[];
+var map;
+var geocode_calls = 0;
+var geocode_overload = false;
+function initialize() {
+  geocoder = new google.maps.Geocoder();
+  var latlng = new google.maps.LatLng(39, -95);
+  var mapOptions = {
+    zoom: 4,
+    center: latlng
+  }
+  map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  ripple(0);
+}
+
+function ripple(ind) {
+	var timeout=add_marker(grouped_friends[ind]);
+	if(ind<grouped_friends.length-1)
+		setTimeout(function(){ripple(ind+1);},timeout);
+}
+function geocode(dest,address,callback) {
+  if(localStorage && localStorage['address_'+dest]) {
+    callback(JSON.parse(localStorage['address_'+dest]));
+    return 0;
+  } else {
+    geocode_calls++;
+    // console.log(new Date+" ==Query== "+dest);
+    geocoder.geocode( {'address': address}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        geocode_overload = false;
+        if(localStorage) {
+          localStorage['address_'+dest]=JSON.stringify({lat:results[0].geometry.location.lat(),lng:results[0].geometry.location.lng()});
+        }
+        callback(results[0].geometry.location);
+      } else {
+        geocode_overload = true;
+        console.log("[Overload] "+dest);
+        setTimeout(function(){geocode(dest,address,callback);},2000);
+      }
+    });
+    return (geocode_overload || geocode_calls%4==3)?1500:50;
+  }
+}
+
+function get_diff_time(friend) {
+  var targetTimeRaw = new Date(friend.date.month + '/' + friend.date.day + '/' + friend.date.year + ' ' + friend.date.hour + ':' + friend.date.min + ':' + friend.date.sec);
+  var targetTime = new Date(targetTimeRaw.getTime()-(targetTimeRaw.getTimezoneOffset()+270)*60*1000);
+  var nowTime = new Date();
+  var diff_secs = Math.floor((targetTime.valueOf()-nowTime.valueOf())/1000);
+  var hours = Math.floor(diff_secs/60/60)%24;
+  var days = Math.floor(diff_secs/60/60/24);
+  return {'hours':hours,'days':days};
+}
+
+function get_boarding_desc(friend) {
+  if(landed(friend) && friend.hasvisa)
+    return "Arrived on "+monthNames[friend.date.month-1]+" "+friend.date.day+", "+friend.date.year;
+  else if(landed(friend) && !friend.hasvisa)
+    return "Hasn't arrived on "+monthNames[friend.date.month-1]+" "+friend.date.day+", "+friend.date.year;
+  else
+  {
+    var d=get_diff_time(friend);
+    var daystr=d.days>1?" days":" day";
+    var hourstr=d.hours>1?" hours":" hour";
+    if(d.days==0 && d.hours==0)
+      return "Boarding in less than an hour";
+    else
+      return "Boarding in "+(d.days>0?d.days+daystr:d.hours+hourstr);
+  }
+}
+
+function get_description(gfriend) {
+  var str="";
+  var single = (gfriend.list.length==1);
+  gfriend.list.forEach(function(friend){
+    var color = 'black';
+    if(!friend.hasvisa)
+      color = 'darkorange';
+    if(!friend.hasvisa && landed(friend))
+      color = 'red';
+
+    str+="<div style='font-weight:bold; color:"+color+"'>"+friend.name+"</div>";
+    if(!single)
+      str+="<div>"+get_boarding_desc(friend)+"</div>"
+  });
+  str+="<b>Location: </b>"+gfriend.dest;
+  if(single)
+    str+="<div>"+get_boarding_desc(gfriend.list[0])+"</div>";
+  return str;
+}
+
+function landed(friend) {
+  var targetTimeRaw = new Date(friend.date.month + '/' + friend.date.day + '/' + friend.date.year + ' ' + friend.date.hour + ':' + friend.date.min + ':' + friend.date.sec);
+  var targetTime = new Date(targetTimeRaw.getTime()-(targetTimeRaw.getTimezoneOffset()+270)*60*1000);
+  return (Date.now()>=targetTime);
+}
+
+function get_icon(gfriend) {
+  if(gfriend.list.some(function(f){return !f.hasvisa;}))
+    return visa_icon;
+  else if(gfriend.list.every(function(f){return landed(f);}))
+    return landed_icon;
+  else
+    return airport_icon;
+}
+
+function add_marker(gfriend) {
+  return geocode(gfriend.dest,gfriend.address,function(loc){
+    //bounds.extend(results[0].geometry.location);
+    //map.fitBounds(bounds);
+    var infowindow = new google.maps.InfoWindow({
+      content: get_description(gfriend)
+    });
+    var marker = new google.maps.Marker({
+      map: map,
+      position: loc,
+      icon: get_icon(gfriend),
+      title: gfriend.dest
+    });
+    google.maps.event.addListener(marker, 'click', function() {
+      infowindow.open(map,marker);
+    });
+    marker.setAnimation(google.maps.Animation.DROP);
+    markersArray.push(marker);
+  });
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+</head>
+
+<body>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-35315850-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<div id="map-canvas"></div>
+<a href="{% url 'mtt' %}" id="go-back">Minutes to Takeoff<br/>Countdown</a>
+</body>
+
+</html>
