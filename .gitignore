@@ -1,7 +1,18 @@
-
-.DS_Store
+# Local Settings
 local_settings.py
+
+# DB
 *.sqlite3
+
+# Mac
+.DS_Store
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Pycharm
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -58,4 +69,3 @@ docs/_build/
 
 # PyBuilder
 target/
-

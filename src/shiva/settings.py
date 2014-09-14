@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+from os.path import dirname, join
+# BASE_DIR = dirname(dirname(__file__))
+BASE_DIR = ""
 
 
 # Quick-start development settings - unsuitable for production
@@ -86,6 +87,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (join(BASE_DIR, 'static/'),)
+
+# Template Dirs
+
+TEMPLATE_DIRS = (join(BASE_DIR, 'templates/'),)
+
 
 # Load and override local settings
 
