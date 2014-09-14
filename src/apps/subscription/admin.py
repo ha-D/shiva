@@ -1,4 +1,4 @@
-from django.contrib 	 import admin
+from django.contrib import admin
 from subscription.models import Subscriber 
 # Register your models here.
 
