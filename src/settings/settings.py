@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'shiva',
     'subscription',
     'mtt'
 )
@@ -53,7 +54,7 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'shiva.urls'
 
-WSGI_APPLICATION = 'shiva.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 # Database
@@ -98,6 +99,6 @@ TEMPLATE_DIRS = (join(BASE_DIR, 'templates/'),)
 # Load and override local settings
 
 try:
-    from shiva.local_settings import *
+    from .local_settings import *
 except ImportError:
     pass
